@@ -1,14 +1,10 @@
-/* =========================================================
-   ENUNCIADO
-   Base de datos para gestionar empleados, departamentos,
-   estudios, historial laboral y salarial de una empresa.
-   ========================================================= */
+-- ENUNCIADO
+-- Base de datos para almacenar información de empleados, departamentos,
+-- estudios, historial laboral y salarial de una empresa.
 
-/* =========================================================
-   1. CREACIÓN DE TABLAS CON ATRIBUTOS OBLIGATORIOS (NOT NULL)
-   ========================================================= */
+-- 1. CREACIÓN DE TABLAS CON ATRIBUTOS OBLIGATORIOS (NOT NULL)
 
-/* Tabla de departamentos */
+-- Tabla Departamentos
 CREATE TABLE Departamentos (
     dpto_cod NUMBER(5) PRIMARY KEY,
     nombre_dpto VARCHAR2(30) NOT NULL,
@@ -19,7 +15,7 @@ CREATE TABLE Departamentos (
         REFERENCES Departamentos(dpto_cod)
 );
 
-/* Tabla de empleados */
+-- Tabla Empleados
 CREATE TABLE Empleados (
     dni NUMBER(8) PRIMARY KEY,
     nombre VARCHAR2(10) NOT NULL,
@@ -37,7 +33,7 @@ CREATE TABLE Empleados (
         REFERENCES Departamentos(dpto_cod)
 );
 
-/* Tabla de universidades */
+-- Tabla Universidades
 CREATE TABLE Universidades (
     univ_cod NUMBER(5) PRIMARY KEY,
     nombre_univ VARCHAR2(25) NOT NULL,
@@ -46,7 +42,7 @@ CREATE TABLE Universidades (
     cod_postal VARCHAR2(5)
 );
 
-/* Tabla de estudios */
+-- Tabla Estudios
 CREATE TABLE Estudios (
     empleado_dni NUMBER(8),
     universidad NUMBER(5),
@@ -59,7 +55,7 @@ CREATE TABLE Estudios (
         REFERENCES Universidades(univ_cod)
 );
 
-/* Tabla de trabajos */
+-- Tabla Trabajos
 CREATE TABLE Trabajos (
     trabajo_cod NUMBER(5) PRIMARY KEY,
     nombre_trab VARCHAR2(20) NOT NULL,
@@ -67,7 +63,7 @@ CREATE TABLE Trabajos (
     salario_max NUMBER(2) NOT NULL
 );
 
-/* Tabla de historial laboral */
+-- Tabla Historial Laboral
 CREATE TABLE Historial_Laboral (
     empleado_dni NUMBER(8),
     univ_cod NUMBER(5),
@@ -89,7 +85,7 @@ CREATE TABLE Historial_Laboral (
         REFERENCES Empleados(dni)
 );
 
-/* Tabla de historial salarial */
+-- Tabla Historial Salarial
 CREATE TABLE Historial_Salarial (
     empleado_dni NUMBER(8),
     salario NUMBER NOT NULL,
@@ -100,25 +96,19 @@ CREATE TABLE Historial_Salarial (
         REFERENCES Empleados(dni)
 );
 
-/* =========================================================
-   2. RESTRICCIÓN DE SEXO (H/M)
-   ========================================================= */
+-- 2. RESTRICCIÓN DEL CAMPO SEXO (H/M)
 ALTER TABLE Empleados
 ADD CONSTRAINT check_empleado_sexo
 CHECK (sexo IN ('H', 'M'));
 
-/* =========================================================
-   3. NOMBRES ÚNICOS EN DEPARTAMENTOS Y TRABAJOS
-   ========================================================= */
+-- 3. NOMBRES ÚNICOS EN DEPARTAMENTOS Y TRABAJOS
 ALTER TABLE Departamentos
 ADD CONSTRAINT unique_departamento_nombre UNIQUE (nombre_dpto);
 
 ALTER TABLE Trabajos
 ADD CONSTRAINT unique_trabajo_nombre UNIQUE (nombre_trab);
 
-/* =========================================================
-   4. UN SOLO SALARIO Y TRABAJO POR PERÍODO
-   ========================================================= */
+-- 4. UN SOLO SALARIO Y TRABAJO POR PERÍODO
 ALTER TABLE Historial_Salarial
 ADD CONSTRAINT unique_salario_por_periodo
 UNIQUE (empleado_dni, fecha_comienzo);
@@ -127,18 +117,14 @@ ALTER TABLE Historial_Laboral
 ADD CONSTRAINT unique_trabajo_por_periodo
 UNIQUE (empleado_dni, fecha_inicio);
 
-/* =========================================================
-   6. AGREGAR TELÉFONO Y CELULAR A EMPLEADOS
-   ========================================================= */
+-- 6. AGREGAR TELÉFONO Y CELULAR A EMPLEADOS
 ALTER TABLE Empleados
 ADD (
     telefono VARCHAR2(15),
     celular VARCHAR2(15)
 );
 
-/* =========================================================
-   7. INSERCIÓN DE DATOS
-   ========================================================= */
+-- 7. INSERCIÓN DE DATOS
 INSERT INTO Empleados (nombre, apellido1, apellido2, dni, sexo)
 VALUES ('Sergio', 'Palma', 'Entrena', 111222, 'H');
 
@@ -148,11 +134,9 @@ VALUES ('Ana', 'Torres', 'Mendoza', 111223, 'M');
 INSERT INTO Historial_Laboral (empleado_dni, fecha_inicio, dpto_cod)
 VALUES (111222, TO_DATE('16/06/1996','DD/MM/YYYY'), 222333);
 
-/* =========================================================
-   9. MODIFICACIÓN DE CLAVE FORÁNEA EN ESTUDIOS
-   ========================================================= */
+-- 9. MODIFICACIÓN DE CLAVE FORÁNEA EN ESTUDIOS
 
-/* Opción a: borrar estudios asociados */
+-- Opción A: borrar estudios asociados
 ALTER TABLE ESTUDIOS
 DROP CONSTRAINT fk_estudios_universidad;
 
@@ -162,7 +146,7 @@ FOREIGN KEY (id_universidad)
 REFERENCES UNIVERSIDADES(id_universidad)
 ON DELETE CASCADE;
 
-/* Opción b: dejar universidad en NULL */
+-- Opción B: dejar universidad en NULL
 ALTER TABLE Estudios
 DROP CONSTRAINT fk_estudios_universidad;
 
@@ -172,42 +156,30 @@ FOREIGN KEY (id_universidad)
 REFERENCES Universidades(id_universidad)
 ON DELETE SET NULL;
 
-/* =========================================================
-   10. CIUDAD IMPLICA CÓDIGO POSTAL
-   ========================================================= */
+-- 10. CIUDAD IMPLICA CÓDIGO POSTAL
 ALTER TABLE Empleados
 ADD CONSTRAINT chk_ciudad_codpostal
 CHECK (ciudad IS NULL OR cod_postal IS NOT NULL);
 
-/* =========================================================
-   11. CAMPO VALORACIÓN CON VALOR POR DEFECTO
-   ========================================================= */
+-- 11. CAMPO VALORACIÓN CON VALOR POR DEFECTO
 ALTER TABLE Empleados
 ADD valoracion NUMBER(2)
 DEFAULT 5
 CONSTRAINT chk_valoracion CHECK (valoracion BETWEEN 1 AND 10);
 
-/* =========================================================
-   12. ELIMINAR NOT NULL DE NOMBRE
-   ========================================================= */
+-- 12. ELIMINAR NOT NULL DEL CAMPO NOMBRE
 ALTER TABLE Empleados
 MODIFY nombre VARCHAR2(10) NULL;
 
-/* =========================================================
-   13. MODIFICAR TAMAÑO DE DIRECC1
-   ========================================================= */
+-- 13. MODIFICAR TAMAÑO DE DIRECC1
 ALTER TABLE Empleados
 MODIFY direcc1 VARCHAR2(40);
 
-/* =========================================================
-   14. MODIFICAR FECHA_NAC A CADENA
-   ========================================================= */
+-- 14. MODIFICAR FECHA_NAC A CADENA
 ALTER TABLE Empleados
 MODIFY fecha_nac VARCHAR2(10);
 
-/* =========================================================
-   15. CAMBIAR CLAVE PRIMARIA DE EMPLEADOS
-   ========================================================= */
+-- 15. CAMBIAR CLAVE PRIMARIA DE EMPLEADOS
 ALTER TABLE Empleados
 DROP PRIMARY KEY;
 
@@ -215,9 +187,7 @@ ALTER TABLE Empleados
 ADD CONSTRAINT pk_empleados
 PRIMARY KEY (nombre, apellido1, apellido2);
 
-/* =========================================================
-   16. TABLA INFORMACIÓN UNIVERSITARIA
-   ========================================================= */
+-- 16. TABLA INFORMACION_UNIVERSITARIA
 CREATE TABLE Informacion_Universitaria (
     empleado_nombre_completo VARCHAR2(100),
     universidad VARCHAR2(25)
@@ -228,32 +198,24 @@ SELECT
     RTRIM(e.nombre || ' ' || e.apellido1 || ' ' || NVL(e.apellido2, '')),
     u.nombre_univ
 FROM Empleados e
-JOIN Estudios est
-    ON e.dni = est.empleado_dni
-JOIN Universidades u
-    ON est.universidad = u.univ_cod;
+JOIN Estudios est ON e.dni = est.empleado_dni
+JOIN Universidades u ON est.universidad = u.univ_cod;
 
-/* =========================================================
-   17. VISTA DE EMPLEADOS DE MÁLAGA
-   ========================================================= */
+-- 17. VISTA DE EMPLEADOS DE MÁLAGA
 CREATE VIEW Nombre_Empleados AS
 SELECT
     nombre || ' ' || apellido1 || ' ' || NVL(apellido2, '') AS nombre_completo
 FROM Empleados
 WHERE ciudad = 'Málaga';
 
-/* =========================================================
-   18. VISTA CON EDAD DE EMPLEADOS
-   ========================================================= */
+-- 18. VISTA CON EDAD DE EMPLEADOS
 CREATE VIEW Informacion_Empleados AS
 SELECT
     nombre || ' ' || apellido1 || ' ' || NVL(apellido2, '') AS nombre_completo,
     TRUNC(MONTHS_BETWEEN(SYSDATE, fecha_nac) / 12) AS edad
 FROM Empleados;
 
-/* =========================================================
-   19. VISTA CON INFORMACIÓN ACTUAL Y SALARIO
-   ========================================================= */
+-- 19. VISTA CON INFORMACIÓN ACTUAL Y SALARIO
 CREATE VIEW Informacion_Actual AS
 SELECT
     ie.nombre_completo,
@@ -264,9 +226,7 @@ JOIN Empleados e
     ON ie.nombre_completo =
        e.nombre || ' ' || e.apellido1 || ' ' || NVL(e.apellido2, '');
 
-/* =========================================================
-   20. BORRADO DE TABLAS (RESPETANDO CLAVES FORÁNEAS)
-   ========================================================= */
+-- 20. BORRADO DE TABLAS RESPETANDO CLAVES FORÁNEAS
 DROP TABLE Historial_Laboral;
 DROP TABLE Historial_Salarial;
 DROP TABLE Estudios;
